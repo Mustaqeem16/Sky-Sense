@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌤️ Weather App</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(to bottom, #a1c4fd, #c2e9fb);
+      transition: background 0.6s ease-in-out;
+    }
+
+    #container {
+      width: 380px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      padding: 25px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #0077b6;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 70%;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      outline: none;
+    }
+
+    #btn {
+      padding: 10px 15px;
+      border-radius: 12px;
+      background-color: #0077b6;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    #btn:hover {
+      background-color: #005f8c;
+    }
+
+    #result {
+      margin-top: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .weather-icon {
+      width: 100px;
+      height: 100px;
+    }
+
+    .loading {
+      font-size: 18px;
+      color: #0077b6;
+      margin-top: 20px;
+    }
+
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+
+    .details {
+      text-align: left;
+      margin-top: 10px;
+      padding-left: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>🌤️ Weather App</h1>
+    <div>
+      <input type="text" placeholder="Enter city name" id="climate" required>
+      <button id="btn">Search</button>
+    </div>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const btn = document.getElementById("btn");
+    const result = document.getElementById("result");
+    const api_key = "cce4c255b41c67fe4803cc53760a3891";
+
+    btn.addEventListener("click", () => {
+      const city = document.getElementById("climate").value.trim();
+      if (city === "") {
+        result.innerHTML = `<p class="error">⚠️ Please enter a city name!</p>`;
+        return;
+      }
+
+      result.innerHTML = `<p class="loading">⏳ Fetching weather data...</p>`;
+
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${api_key}&units=metric`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data.cod === "404") {
+            result.innerHTML = `<p class="error">❌ City not found!</p>`;
+            document.body.style.background = "linear-gradient(to bottom, #a1c4fd, #c2e9fb)";
+          } else {
+            const icon = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+
+            // Change background color based on weather
+            const weather = data.weather[0].main.toLowerCase();
+            if (weather.includes("cloud")) {
+              document.body.style.background = "linear-gradient(to bottom, #bdc3c7, #2c3e50)";
+            } else if (weather.includes("rain")) {
+              document.body.style.background = "linear-gradient(to bottom, #00c6fb, #005bea)";
+            } else if (weather.includes("clear")) {
+              document.body.style.background = "linear-gradient(to bottom, #fddb92, #d1fdff)";
+            } else if (weather.includes("snow")) {
+              document.body.style.background = "linear-gradient(to bottom, #e6dada, #274046)";
+            } else {
+              document.body.style.background = "linear-gradient(to bottom, #a1c4fd, #c2e9fb)";
+            }
+
+            result.innerHTML = `
+              <h2>${data.name}, ${data.sys.country}</h2>
+              <img src="${icon}" alt="Weather Icon" class="weather-icon">
+              <p><b>${data.weather[0].main}</b> - ${data.weather[0].description}</p>
+              <h3>🌡️ ${data.main.temp}°C</h3>
+              <div class="details">
+                <p>Feels like: ${data.main.feels_like}°C</p>
+                <p>Humidity: ${data.main.humidity}%</p>
+                <p>Pressure: ${data.main.pressure} hPa</p>
+                <p>Wind speed: ${data.wind.speed} m/s</p>
+              </div>
+            `;
+          }
+        })
+        .catch(() => {
+          result.innerHTML = `<p class="error">⚠️ Unable to fetch data. Please try again later.</p>`;
+        });
+    });
+  </script>
+</body>
+</html>
